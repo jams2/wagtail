@@ -5,3 +5,4 @@ from .list_block import *  # NOQA: F403
 from .static_block import *  # NOQA: F403
 from .stream_block import *  # NOQA: F403
 from .struct_block import *  # NOQA: F403
+from .union_block import *  # NOQA: F403
