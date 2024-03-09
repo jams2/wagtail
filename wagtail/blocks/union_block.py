@@ -17,10 +17,16 @@ class UnionValue:
 
 
 class UnionBlock(BaseStructBlock, metaclass=DeclarativeSubBlocksMetaclass):
-    def __init__(self, local_blocks=None, *args, **kwargs):
+    def __init__(self, local_blocks=None, default_type=None, *args, **kwargs):
         super().__init__(local_blocks=local_blocks, *args, **kwargs)
+
+        if not default_type:
+            default_type = next(self.child_blocks.values()).name
+        elif default_type not in self.child_blocks:
+            raise ValueError("default_type must be the name of one of the UnionBlock's members")
+
         selector_block = ChoiceBlock(
-            default=list(self.child_blocks.values())[0].name,
+            default=default_type,
             choices=[(b.name, b.label) for b in self.child_blocks.values()],
             widget=widgets.RadioSelect(),
             label="Type",
