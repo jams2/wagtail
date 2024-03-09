@@ -12,8 +12,8 @@ from .field_block import ChoiceBlock
 from .struct_block import BaseStructBlock, StructValue
 
 
-class UnionValue:
-    ...
+class UnionValue(StructValue):
+    pass
 
 
 class UnionBlock(BaseStructBlock, metaclass=DeclarativeSubBlocksMetaclass):
@@ -36,11 +36,24 @@ class UnionBlock(BaseStructBlock, metaclass=DeclarativeSubBlocksMetaclass):
             __union_type__=selector_block, **self.child_blocks
         )
 
+    def value_from_datadict(self, data, files, prefix):
+        selected_type = data.get(f"{prefix}-__union_type__")
+        return self._to_struct_value(
+            [
+                (
+                    name,
+                    block.value_from_datadict(data, files, f"{prefix}-{name}"),
+                )
+                for name, block in self.child_blocks.items()
+                if name in ("__union_type__", selected_type)
+            ]
+        )
+
     class Meta:
         default = {}
         form_classname = "union-block"
         form_template = None
-        value_class = StructValue
+        value_class = UnionValue
         label_format = None
         icon = "placeholder"
 
